@@ -46,14 +46,14 @@ const getAllTeamsProgress = async (req, res) => {
 
 // Predefined correct clues for 8 clues
 const correctClues = {
-    clue1: 'a.com',
-    clue2: 'b.com',
-    clue3: 'c.com',
-    clue4: 'd.com',
-    clue5: 'e.com',
-    clue6: 'f.com',
-    clue7: 'g.com',
-    clue8: 'h.com',
+    clue1: 'https://qrco.de/bfifAd?trackSharing=1',
+    clue2: 'https://qrco.de/bfiTJQ?trackSharing=1',
+    clue3: 'https://qrco.de/bfiTMZ?trackSharing=1',
+    clue4: 'https://qrco.de/bfiTNQ?trackSharing=1',
+    clue5: 'https://qrco.de/bfiTWN',
+    clue6: 'https://qrco.de/bfiTXu?trackSharing=1',
+    clue7: 'https://qrco.de/bfiTe2?trackSharing=1',
+    clue8: 'https://qrco.de/bfif4I?trackSharing=1',
 };
 
 // Function to handle clue submission
