@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getTeamDetails, submitClue,getAllTeamsProgress } = require('../controllers/teamController');
-const authMiddleware = require('../middleware/authMiddleware'); // Import the auth middleware for protection
-const adminAuthMiddleware = require('../middleware/adminAuthMiddleware'); // For admin authentication
+const authMiddleware = require('../middleware/authMiddleware'); // Import the auth middleware for protection // For admin authentication
 
 
 // Get the current team's details (protected route)

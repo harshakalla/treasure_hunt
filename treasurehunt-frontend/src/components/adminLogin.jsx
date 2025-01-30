@@ -1,30 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate(); // Use useNavigate hook for redirection
+    const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const hardcodedUsername = 'admin';  // Hardcoded admin username
+    const hardcodedPassword = '1729';  // Hardcoded admin password
+
+    const handleSubmit = (e) => {
         e.preventDefault();
 
-        try {
-            // Send login request to backend
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/admin/login`, {
-                username,
-                password,
-            });
-
-            // If login is successful, store the token in localStorage
-            localStorage.setItem('authToken', response.data.token);
-
-            // Redirect to Admin Dashboard
+        // Check if the entered username and password match the hardcoded credentials
+        if (username === hardcodedUsername && password === hardcodedPassword) {
+            // Redirect to Admin Dashboard if login is successful
             navigate('/admin-dashboard');
-        } catch (error) {
-            console.error('Error logging in:', error);
+        } else {
+            // Show error if the credentials are incorrect
             setError('Invalid credentials. Please try again.');
         }
     };
