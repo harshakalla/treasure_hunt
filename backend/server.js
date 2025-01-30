@@ -19,11 +19,21 @@ const app = express();
 app.use(express.json());
 
 // Enable cross-origin requests for your frontend (running on port 3000)
-app.use(cors({
-    origin: 'http://localhost:3000', // Frontend running on port 3000
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Enable necessary methods
-    allowedHeaders: ['Content-Type', 'Authorization'] // Enable authorization header if you're using JWT
-}));
+const allowedOrigins = [/\.vercel\.app$/]; // Allow all subdomains of vercel.app
+app.use(
+    cors({
+        origin: function(origin, callback) {
+            if (!origin || allowedOrigins.some(pattern => pattern.test(origin))) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+        credentials: true,
+    })
+);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, {})

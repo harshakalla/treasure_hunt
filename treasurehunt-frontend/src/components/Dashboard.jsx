@@ -24,7 +24,7 @@ const Dashboard = () => {
             // Fetch the team progress from the backend
             const fetchProgress = async () => {
                 try {
-                    const response = await axios.get('http://localhost:4000/api/user/team', {
+                    const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/team`, {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                         },
@@ -84,7 +84,7 @@ const Dashboard = () => {
         try {
             // Send the clue link and clue number to the server
             const response = await axios.post(
-                'http://localhost:4000/api/user/submit-clue',
+                `${process.env.REACT_APP_BACKEND_URL}/api/user/submit-clue`,
                 { clueNumber: `clue${clueNumber}`, clueLink },
                 {
                     headers: {

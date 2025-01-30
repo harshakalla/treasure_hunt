@@ -13,7 +13,7 @@ const AdminLogin = () => {
 
         try {
             // Send login request to backend
-            const response = await axios.post('http://localhost:4000/api/admin/login', {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/admin/login`, {
                 username,
                 password,
             });
