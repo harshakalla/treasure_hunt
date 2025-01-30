@@ -9,8 +9,6 @@ const Home = () => {
             <div className="home-actions">
                 <Link to="/signup" className="home-btn home-btn-signup">Register</Link>
                 <Link to="/login" className="home-btn home-btn-login">Login</Link>
-                {/* Added Admin Dashboard button */}
-                <Link to="/admin-login" className="home-btn home-btn-admin">Admin Dashboard</Link>
             </div>
         </div>
     );

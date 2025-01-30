@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const teamRoutes = require('./routes/teamRoute'); // Import the team routes
-const adminAuthRoute = require('./routes/adminRoute');
+
 
  // Ensure this is required for protecting routes if needed
 
@@ -46,7 +46,7 @@ mongoose.connect(process.env.MONGO_URI, {})
 // Use the routes
 app.use('/auth', authRoutes); // Authentication routes (login/signup etc.)
 app.use('/api/user', teamRoutes); // Team-related routes (protected)
-app.use('/api/admin', adminAuthRoute); // Admin routes
+// Admin routes
 
 // Catch-all for invalid routes (optional but useful for debugging)
 app.get('/', (req, res) => {

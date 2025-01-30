@@ -1,16 +1,16 @@
 // App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext'; // Import the AuthProvider
 import Home from './components/Home';
 import Signup from './components/Signup';
 import Login from './components/Login';
-import AdminLogin from './components/adminLogin';
+import Admin from './components/adminDashboard';
+
 import Dashboard from './components/Dashboard';
-import AdminDashboard from './components/adminDashboard';
+
 
 const App = () => {
-    const isLoggedIn = !!localStorage.getItem('adminToken'); // Check if the admin is logged in
 
     return (
         <AuthProvider> {/* Wrap your app inside AuthProvider */}
@@ -20,12 +20,11 @@ const App = () => {
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/admin" element={<Admin />} />
+
                     
-                    {/* Admin Routes */}
-                    <Route path="/admin-login" element={<AdminLogin />} />
-                    
-                    {/* If the user is logged in, show the admin dashboard, else redirect to login */}
-                    <Route path="/admin-dashboard" element={isLoggedIn ? <AdminDashboard /> : <Navigate to="/admin-login" />} />
+                  
+                  
                 </Routes>
             </Router>
         </AuthProvider>
