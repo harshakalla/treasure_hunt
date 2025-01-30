@@ -47,8 +47,8 @@ app.use('/api/admin', adminAuthRoute);
 
 
 // Catch-all for invalid routes (optional but useful for debugging)
-app.use('*', (req, res) => {
-    res.status(404).json({ message: 'Route not found' });
+app.get('/', (req, res) => {
+    res.send('API Working');
 });
 
 // Start the server
