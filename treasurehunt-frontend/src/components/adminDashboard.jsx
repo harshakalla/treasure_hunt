@@ -4,10 +4,9 @@ import axios from 'axios';
 const AdminDashboard = () => {
     const [teamProgress, setTeamProgress] = useState([]);
     const [isSorted, setIsSorted] = useState(false);
-    const [loading, setLoading] = useState(true); // Add loading state
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch team progress data from the backend
         const fetchTeamProgress = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/team-progress`, {
@@ -19,10 +18,9 @@ const AdminDashboard = () => {
             } catch (error) {
                 console.error('Error fetching team progress:', error);
             } finally {
-                setLoading(false); // Set loading to false once data is fetched
+                setLoading(false);
             }
         };
-
         fetchTeamProgress();
     }, []);
 
@@ -30,7 +28,6 @@ const AdminDashboard = () => {
         ? [...teamProgress].sort((a, b) => {
               const clue8A = a.progress.clue8.submissionTime ? new Date(a.progress.clue8.submissionTime) : null;
               const clue8B = b.progress.clue8.submissionTime ? new Date(b.progress.clue8.submissionTime) : null;
-
               if (clue8A && clue8B) return clue8A - clue8B;
               if (clue8A && !clue8B) return -1;
               if (!clue8A && clue8B) return 1;
@@ -42,8 +39,7 @@ const AdminDashboard = () => {
         setIsSorted(true);
     };
 
-    // Calculate the progress for each clue (0% for unsolved, 100% for solved)
-    const calculateProgress = (clue) => (clue.isCorrect ? 100 : 0);
+    const calculateProgress = (clue) => (clue?.isCorrect ? 100 : 0);
 
     const formatTime = (timeString) => {
         if (!timeString) return 'N/A';
@@ -55,7 +51,7 @@ const AdminDashboard = () => {
         return (
             <div style={styles.dashboardContainer}>
                 <h1 style={styles.header}>Admin Dashboard</h1>
-                <div style={styles.loading}>Loading...</div> {/* Display loading text */}
+                <div style={styles.loading}>Loading...</div>
             </div>
         );
     }
@@ -66,38 +62,40 @@ const AdminDashboard = () => {
             <button style={styles.sortButton} onClick={handleSort}>
                 Sort by Clue 8 Submission Time
             </button>
-            <table style={styles.table}>
-                <thead>
-                    <tr>
-                        <th>Team ID</th>
-                        {[...Array(8)].map((_, idx) => (
-                            <th key={idx}>Clue {idx + 1} Progress</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {sortedTeams.map((team) => (
-                        <tr key={team.teamID}>
-                            <td>{team.teamID}</td>
+            <div style={styles.tableContainer}>
+                <table style={styles.table}>
+                    <thead>
+                        <tr>
+                            <th style={styles.th}>Team ID</th>
                             {[...Array(8)].map((_, idx) => (
-                                <td key={idx}>
-                                    <div style={styles.progressBarContainer}>
-                                        <div style={styles.progressLabel}>
-                                            {formatTime(team.progress[`clue${idx + 1}`]?.submissionTime)}
-                                        </div>
-                                        <div
-                                            style={{
-                                                ...styles.progressBar,
-                                                width: `${calculateProgress(team.progress[`clue${idx + 1}`])}%`,
-                                            }}
-                                        ></div>
-                                    </div>
-                                </td>
+                                <th key={idx} style={styles.th}>Clue {idx + 1} Progress</th>
                             ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {sortedTeams.map((team) => (
+                            <tr key={team.teamID} style={styles.tr}>
+                                <td style={styles.td}>{team.teamID}</td>
+                                {[...Array(8)].map((_, idx) => (
+                                    <td key={idx} style={styles.td}>
+                                        <div style={styles.progressBarContainer}>
+                                            <div style={styles.progressLabel}>
+                                                {formatTime(team.progress[`clue${idx + 1}`]?.submissionTime)}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    ...styles.progressBar,
+                                                    width: `${calculateProgress(team.progress[`clue${idx + 1}`])}%`,
+                                                }}
+                                            ></div>
+                                        </div>
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
@@ -111,6 +109,7 @@ const styles = {
         boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
         maxWidth: '1200px',
         margin: '40px auto',
+        overflowX: 'auto',
     },
     header: {
         fontSize: '36px',
@@ -132,6 +131,10 @@ const styles = {
         fontWeight: '600',
         transition: 'background-color 0.3s ease, transform 0.2s ease',
     },
+    tableContainer: {
+        width: '100%',
+        overflowX: 'auto',
+    },
     table: {
         width: '100%',
         borderCollapse: 'collapse',
@@ -139,27 +142,42 @@ const styles = {
         borderRadius: '8px',
         overflow: 'hidden',
         marginTop: '20px',
+        minWidth: '800px',
+    },
+    th: {
+        backgroundColor: '#4A5568',
+        color: 'white',
+        padding: '12px',
+        textAlign: 'left',
+    },
+    tr: {
+        borderBottom: '1px solid #E2E8F0',
+    },
+    td: {
+        padding: '12px',
+        borderBottom: '1px solid #E2E8F0',
+        backgroundColor: '#f7fafc',
     },
     progressBarContainer: {
         width: '100%',
         backgroundColor: '#e2e8f0',
         borderRadius: '6px',
-        height: '20px', // Increased height for more visibility
+        height: '20px',
         position: 'relative',
-        marginBottom: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     progressLabel: {
         fontSize: '12px',
-        color: '#ffffff', // White text for submission time
+        color: '#2d3748',
         textAlign: 'center',
+        fontWeight: 'bold',
         position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 1, // Ensure time is above progress bar
+        width: '100%',
     },
     progressBar: {
-        backgroundColor: '#48bb78', // Green progress
+        backgroundColor: '#48bb78',
         height: '100%',
         borderRadius: '6px',
         transition: 'width 0.4s ease',

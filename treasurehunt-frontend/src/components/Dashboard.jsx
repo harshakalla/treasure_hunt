@@ -1,39 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // You may need to install this package
+import { jwtDecode } from 'jwt-decode'; // Ensure you have installed this package
 import axios from 'axios';
 
 const Dashboard = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // To check if the user is logged in
-    const [teamID, setTeamID] = useState(''); // State to store the teamID
-    const [clueNumber, setClueNumber] = useState(1); // Track the current clue
-    const [clueLink, setClueLink] = useState(''); // Store the entered clue link
-    const [message, setMessage] = useState(''); // Store the response message
-    const [clueStatus, setClueStatus] = useState(Array(8).fill(false)); // Track clue completion status for 8 clues
-    const [isSubmitting, setIsSubmitting] = useState(false); // State to track submission status
-    const navigate = useNavigate(); // Initialize useNavigate hook
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [teamID, setTeamID] = useState('');
+    const [clueNumber, setClueNumber] = useState(1);
+    const [clueLink, setClueLink] = useState('');
+    const [message, setMessage] = useState('');
+    const [clueStatus, setClueStatus] = useState(Array(8).fill(false));
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
 
-    // Check if the user is logged in on component mount
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        
+
         if (token) {
             setIsLoggedIn(true);
-            const decodedToken = jwtDecode(token); // Decode the token to get teamID
-            setTeamID(decodedToken.teamID); // Set teamID from decoded token
+            const decodedToken = jwtDecode(token);
+            setTeamID(decodedToken.teamID);
 
-            // Fetch the team progress from the backend
             const fetchProgress = async () => {
                 try {
                     const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/team`, {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                        },
+                        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
                     });
 
-                    // Set the team progress and determine the starting clue number
                     const teamProgress = response.data.progress;
-                    setClueStatus([
+                    const progressArray = [
                         teamProgress.clue1.isCorrect,
                         teamProgress.clue2.isCorrect,
                         teamProgress.clue3.isCorrect,
@@ -42,24 +37,12 @@ const Dashboard = () => {
                         teamProgress.clue6.isCorrect,
                         teamProgress.clue7.isCorrect,
                         teamProgress.clue8.isCorrect,
-                    ]);
+                    ];
 
-                    // Set the clue number to the next unresolved clue
-                    const nextClue = teamProgress.clue1.isCorrect
-                        ? teamProgress.clue2.isCorrect
-                            ? teamProgress.clue3.isCorrect
-                                ? teamProgress.clue4.isCorrect
-                                    ? teamProgress.clue5.isCorrect
-                                        ? teamProgress.clue6.isCorrect
-                                            ? teamProgress.clue7.isCorrect
-                                                ? 8
-                                                : 7
-                                            : 6
-                                        : 5
-                                    : 4
-                                : 3
-                            : 2
-                        : 1;
+                    setClueStatus(progressArray);
+
+                    // Find the next unsolved clue
+                    const nextClue = progressArray.findIndex((isCorrect) => !isCorrect) + 1 || 8;
                     setClueNumber(nextClue);
                 } catch (error) {
                     console.error('Error fetching team progress:', error);
@@ -74,175 +57,199 @@ const Dashboard = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken'); // Clear authToken on logout
-        setIsLoggedIn(false); // Update state to reflect the logout
-        navigate('/'); // Redirect to the home page after logout
+        localStorage.removeItem('authToken');
+        setIsLoggedIn(false);
+        navigate('/');
     };
 
     const handleClueSubmit = async (e) => {
         e.preventDefault();
-        setIsSubmitting(true); // Set submitting state to true
-        
+        setIsSubmitting(true);
+
         try {
-            // Send the clue link and clue number to the server
             const response = await axios.post(
                 `${process.env.REACT_APP_BACKEND_URL}/api/user/submit-clue`,
                 { clueNumber: `clue${clueNumber}`, clueLink },
                 {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                    },
+                    headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
                 }
             );
-    
-            setMessage(response.data.message); // Set message from server response
-    
-            // If the clue is correct, move to the next clue
+
+            setMessage(response.data.message);
+
             if (response.data.message.includes('correct')) {
                 const updatedClueStatus = [...clueStatus];
-                updatedClueStatus[clueNumber - 1] = true; // Mark current clue as correct
+                updatedClueStatus[clueNumber - 1] = true;
                 setClueStatus(updatedClueStatus);
-                
+
                 if (clueNumber < 8) {
-                    setClueNumber(clueNumber + 1); // Proceed to next clue
-                    setClueLink(''); // Clear the input field
+                    setClueNumber(clueNumber + 1);
+                    setClueLink('');
                 }
             }
         } catch (error) {
-            if (error.response) {
-                // If the error response exists (e.g., 400 Bad Request)
-                setMessage(error.response.data.message || 'Error submitting clue. Please try again.');
-            } else {
-                // If no response, the error could be in the network or connection
-                setMessage('Network error. Please check your internet connection.');
-            }
+            setMessage(error.response?.data?.message || 'Network error. Please try again.');
             console.error(error);
         } finally {
-            setIsSubmitting(false); // Set submitting state to false when done
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <div style={styles.dashboardContainer}>
-            {/* Show welcome message and logout button if the user is logged in */}
+        <div style={styles.container}>
             {isLoggedIn ? (
-                <div>
-                    <h1 style={styles.welcomeHeader}>Welcome Team {teamID}!</h1> {/* Display teamID in the welcome message */}
+                <div style={styles.dashboard}>
+                    <h1 style={styles.welcome}>Welcome, Team {teamID}!</h1>
+                    <p style={styles.quote}>“Success is the sum of small efforts, repeated day in and day out.” – Robert Collier</p>
                     <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
 
-                    <div>
-                        <h2 style={styles.clueHeader}>Submit Clue {clueNumber}</h2>
-                        
-                        {/* Dynamic Clues */}
+                    <h2 style={styles.clueHeader}>Submit Clue {clueNumber}</h2>
+
+                    <div style={styles.clueContainer}>
                         {Array.from({ length: 8 }, (_, index) => (
-                            // Only show input for current or unlocked clues
                             clueStatus[index] || index + 1 === clueNumber ? (
-                                <div key={index} style={clueStatus[index] ? { ...styles.clueInput, ...styles.completed } : styles.clueInput}>
+                                <div key={index} style={clueStatus[index] ? { ...styles.clueBox, ...styles.completed } : styles.clueBox}>
                                     <input
                                         type="text"
                                         placeholder={`Enter Clue ${index + 1} Link`}
                                         value={clueNumber === index + 1 ? clueLink : ''}
                                         onChange={(e) => setClueLink(e.target.value)}
-                                        disabled={clueStatus[index]} // Disable input if the clue is correct
-                                        required
-                                        style={styles.inputField}
+                                        disabled={clueStatus[index]}
+                                        style={styles.input}
                                     />
                                     {clueStatus[index] && <span style={styles.checkmark}>✔️</span>}
                                 </div>
                             ) : null
                         ))}
-
-                        <button 
-                            type="submit" 
-                            onClick={handleClueSubmit} 
-                            disabled={clueStatus[clueNumber - 1] || isSubmitting} // Disable button while submitting
-                            style={styles.submitButton}
-                        >
-                            {isSubmitting ? 'Submitting...' : 'Submit Clue'}
-                        </button>
-
-                        <p style={styles.messageText}>{message}</p>
-
-                        {/* Show completion message when all clues are solved */}
-                        {clueStatus[7] && <h2 style={styles.congratulations}>Congratulations! You have completed the game!</h2>}
                     </div>
+
+                    <button
+                        type="submit"
+                        onClick={handleClueSubmit}
+                        disabled={clueStatus[clueNumber - 1] || isSubmitting}
+                        style={styles.submitButton}
+                    >
+                        {isSubmitting ? 'Submitting...' : 'Submit Clue'}
+                    </button>
+
+                    <p style={styles.message}>{message}</p>
+
+                    {clueStatus[7] && <h2 style={styles.congratulations}>Congratulations! You have completed the game!</h2>}
                 </div>
             ) : (
-                <h1 style={styles.loginPrompt}>Please log in to participate in the treasure hunt.</h1>
+                <h1 style={styles.loginMessage}>Please log in to participate in the treasure hunt.</h1>
             )}
         </div>
     );
 };
 
 const styles = {
-    dashboardContainer: {
+    container: {
         fontFamily: 'Arial, sans-serif',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#f4f4f9',
         padding: '20px',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '8px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        maxWidth: '800px',
-        margin: '0 auto',
     },
-    welcomeHeader: {
-        fontSize: '24px',
+    dashboard: {
+        backgroundColor: '#fff',
+        padding: '30px',
+        borderRadius: '10px',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
+        maxWidth: '600px',
+        width: '100%',
+        overflow: 'auto', // Handle content overflow
+    },
+    welcome: {
+        fontSize: '26px',
+        fontWeight: 'bold',
         color: '#333',
+        marginBottom: '10px',
+    },
+    quote: {
+        fontSize: '16px',
+        fontStyle: 'italic',
+        color: '#6c757d',
         marginBottom: '20px',
     },
     logoutButton: {
-        padding: '10px 20px',
-        backgroundColor: '#f44336',
-        color: 'white',
+        padding: '8px 16px',
+        backgroundColor: '#dc3545',
+        color: '#fff',
         border: 'none',
-        fontSize: '16px',
+        borderRadius: '5px',
+        fontSize: '14px',
         cursor: 'pointer',
+        marginBottom: '20px',
     },
     clueHeader: {
         fontSize: '20px',
-        color: '#333',
-        marginTop: '20px',
+        fontWeight: 'bold',
+        color: '#555',
+        marginBottom: '20px',
     },
-    clueInput: {
-        margin: '10px 0',
+    clueContainer: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+        gap: '15px',
+        maxHeight: '400px', // Limit height if needed
+        overflowY: 'auto', // Enable vertical scroll if content overflows
+        marginBottom: '20px',
     },
-    inputField: {
-        padding: '10px',
-        width: '300px',
-        fontSize: '16px',
+    clueBox: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px',
         border: '1px solid #ddd',
-        borderRadius: '4px',
+        borderRadius: '8px',
+        backgroundColor: '#fff',
+        boxSizing: 'border-box',
+    },
+    input: {
+        border: 'none',
+        outline: 'none',
+        width: '100%',
+        padding: '8px',
+        fontSize: '14px',
     },
     completed: {
         backgroundColor: '#d4edda',
-        border: '2px solid #28a745',
+        border: '1px solid #28a745',
         color: '#155724',
     },
     checkmark: {
-        marginLeft: '10px',
         color: '#28a745',
-        fontSize: '20px',
+        fontSize: '18px',
     },
     submitButton: {
-        padding: '10px 20px',
+        marginTop: '20px',
+        padding: '12px 20px',
         backgroundColor: '#007bff',
         border: 'none',
         color: 'white',
         fontSize: '16px',
         cursor: 'pointer',
-        marginTop: '20px',
+        borderRadius: '8px',
+        width: '100%',
+        maxWidth: '200px',
     },
-    messageText: {
+    message: {
         color: '#555',
+        marginTop: '15px',
     },
     congratulations: {
         fontSize: '20px',
-        color: '#28a745',
         fontWeight: 'bold',
+        color: '#28a745',
+        marginTop: '20px',
     },
-    loginPrompt: {
-        fontSize: '24px',
+    loginMessage: {
+        fontSize: '22px',
         color: '#333',
-        textAlign: 'center',
     },
 };
 
