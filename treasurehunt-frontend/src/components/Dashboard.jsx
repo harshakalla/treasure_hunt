@@ -134,7 +134,7 @@ const Dashboard = () => {
 
                     <p style={styles.message}>{message}</p>
 
-                    {clueStatus[7] && <h2 style={styles.congratulations}>Congratulations! You have completed the game!</h2>}
+                    {clueStatus[7] && <h2 style={styles.congratulations}>You are almost there , Find your Treasure Quick!!</h2>}
                 </div>
             ) : (
                 <h1 style={styles.loginMessage}>Please log in to participate in the treasure hunt.</h1>
