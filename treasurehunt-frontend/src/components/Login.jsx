@@ -5,11 +5,13 @@ const Login = () => {
     const [teamID, setTeamID] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // Loading state
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true); // Set loading to true when the form is submitted
 
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/login`, {
@@ -29,6 +31,8 @@ const Login = () => {
             }
         } catch (err) {
             setError('Error connecting to the server');
+        } finally {
+            setIsLoading(false); // Set loading to false once the request is complete
         }
     };
 
@@ -52,7 +56,9 @@ const Login = () => {
                     required
                     className="login-input"
                 />
-                <button type="submit" className="login-btn">Log In</button>
+                <button type="submit" className="login-btn" disabled={isLoading}>
+                    {isLoading ? 'Please wait, logging in...' : 'Log In'}
+                </button>
             </form>
             {error && <p className="login-error">{error}</p>}
         </div>

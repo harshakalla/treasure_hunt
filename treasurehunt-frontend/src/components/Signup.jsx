@@ -5,11 +5,13 @@ const Signup = () => {
     const [teamID, setTeamID] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // Loading state
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true); // Set loading to true when the form is submitted
 
         try {
             // Send signup request
@@ -34,6 +36,8 @@ const Signup = () => {
             }
         } catch (err) {
             setError('Error connecting to the server');
+        } finally {
+            setIsLoading(false); // Set loading to false once the request is complete
         }
     };
 
@@ -57,7 +61,9 @@ const Signup = () => {
                     required
                     className="signup-input"
                 />
-                <button type="submit" className="signup-btn">Register</button>
+                <button type="submit" className="signup-btn" disabled={isLoading}>
+                    {isLoading ? 'Please wait, signing up...' : 'Register'}
+                </button>
             </form>
             {error && <p className="signup-error">{error}</p>}
         </div>

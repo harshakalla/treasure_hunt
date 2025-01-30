@@ -10,6 +10,7 @@ const Dashboard = () => {
     const [clueLink, setClueLink] = useState(''); // Store the entered clue link
     const [message, setMessage] = useState(''); // Store the response message
     const [clueStatus, setClueStatus] = useState(Array(8).fill(false)); // Track clue completion status for 8 clues
+    const [isSubmitting, setIsSubmitting] = useState(false); // State to track submission status
     const navigate = useNavigate(); // Initialize useNavigate hook
 
     // Check if the user is logged in on component mount
@@ -80,7 +81,8 @@ const Dashboard = () => {
 
     const handleClueSubmit = async (e) => {
         e.preventDefault();
-    
+        setIsSubmitting(true); // Set submitting state to true
+        
         try {
             // Send the clue link and clue number to the server
             const response = await axios.post(
@@ -115,6 +117,8 @@ const Dashboard = () => {
                 setMessage('Network error. Please check your internet connection.');
             }
             console.error(error);
+        } finally {
+            setIsSubmitting(false); // Set submitting state to false when done
         }
     };
 
@@ -151,10 +155,10 @@ const Dashboard = () => {
                         <button 
                             type="submit" 
                             onClick={handleClueSubmit} 
-                            disabled={clueStatus[clueNumber - 1]} 
+                            disabled={clueStatus[clueNumber - 1] || isSubmitting} // Disable button while submitting
                             style={styles.submitButton}
                         >
-                            Submit Clue
+                            {isSubmitting ? 'Submitting...' : 'Submit Clue'}
                         </button>
 
                         <p style={styles.messageText}>{message}</p>

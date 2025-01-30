@@ -4,6 +4,7 @@ import axios from 'axios';
 const AdminDashboard = () => {
     const [teamProgress, setTeamProgress] = useState([]);
     const [isSorted, setIsSorted] = useState(false);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         // Fetch team progress data from the backend
@@ -17,6 +18,8 @@ const AdminDashboard = () => {
                 setTeamProgress(response.data);
             } catch (error) {
                 console.error('Error fetching team progress:', error);
+            } finally {
+                setLoading(false); // Set loading to false once data is fetched
             }
         };
 
@@ -47,6 +50,15 @@ const AdminDashboard = () => {
         const date = new Date(timeString);
         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     };
+
+    if (loading) {
+        return (
+            <div style={styles.dashboardContainer}>
+                <h1 style={styles.header}>Admin Dashboard</h1>
+                <div style={styles.loading}>Loading...</div> {/* Display loading text */}
+            </div>
+        );
+    }
 
     return (
         <div style={styles.dashboardContainer}>
@@ -151,6 +163,12 @@ const styles = {
         height: '100%',
         borderRadius: '6px',
         transition: 'width 0.4s ease',
+    },
+    loading: {
+        fontSize: '24px',
+        color: '#2d3748',
+        fontWeight: '600',
+        textAlign: 'center',
     },
 };
 
